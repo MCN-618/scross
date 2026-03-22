@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScCross - Cross-species Single Cell Analysis Platform</title>
+    <!-- External CSS and fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        /* Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Montserrat', 'Roboto', sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+        
+        .background-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 25px 0;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .logo {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(90deg, #4ade80, #22d3ee);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo a {
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        .logo i {
+            margin-right: 10px;
+            font-size: 32px;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 35px;
+        }
+        
+        .nav-links a {
+            color: #94a3b8;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .nav-links a:hover {
+            color: #e2e8f0;
+        }
+        
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #4ade80, #22d3ee);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+        
+        .nav-links a.active {
+            color: #22d3ee;
+        }
+        
+        .nav-links a.active::after {
+            width: 100%;
+        }
+        
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .username {
+            color: #4ade80;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .cta-button {
+            background: linear-gradient(90deg, #0ea5e9, #0d9488);
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(14, 165, 233, 0.4);
+        }
+        
+        .secondary-button {
+            background: rgba(30, 41, 59, 0.7);
+            color: #e2e8f0;
+            border: 1px solid #334155;
+            padding: 12px 28px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .secondary-button:hover {
+            background: rgba(51, 65, 85, 0.5);
+            transform: translateY(-3px);
+        }
+        
+        .hero {
+            padding: 100px 0 150px;
+            position: relative;
+            z-index: 5;
+            text-align: center;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .hero h1 {
+            font-size: 56px;
+            font-weight: 700;
+            margin-bottom: 25px;
+            line-height: 1.2;
+            background: linear-gradient(90deg, #e2e8f0, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .hero h1 span {
+            background: linear-gradient(90deg, #4ade80, #22d3ee);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .hero p {
+            font-size: 20px;
+            color: #94a3b8;
+            margin-bottom: 40px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 40px;
+        }
+        
+        .message-bar {
+            background: rgba(34, 197, 94, 0.2);
+            border: 1px solid #22c55e;
+            color: #22c55e;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+            display: {% if message %}block{% else %}none{% endif %};
+        }
+        
+        .features {
+            padding: 100px 0;
+            position: relative;
+            z-index: 5;
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 70px;
+        }
+        
+        .section-title h2 {
+            font-size: 40px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            background: linear-gradient(90deg, #4ade80, #22d3ee);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .section-title p {
+            font-size: 18px;
+            color: #94a3b8;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        
+        .feature-card {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            border-radius: 16px;
+            padding: 35px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(74, 222, 128, 0.3);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .feature-icon {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 25px;
+            font-size: 28px;
+            color: #4ade80;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .feature-card h3 {
+            font-size: 22px;
+            margin-bottom: 15px;
+            color: #e2e8f0;
+        }
+        
+        .feature-card p {
+            color: #94a3b8;
+            font-size: 16px;
+        }
+        
+        footer {
+            padding: 60px 0 40px;
+            text-align: center;
+            position: relative;
+            z-index: 5;
+            border-top: 1px solid rgba(148, 163, 184, 0.1);
+            margin-top: 50px;
+        }
+        
+        .footer-content {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .footer-logo {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, #4ade80, #22d3ee);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin: 25px 0;
+        }
+        
+        .footer-links a {
+            color: #94a3b8;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .footer-links a:hover {
+            color: #22d3ee;
+        }
+        
+        .copyright {
+            color: #64748b;
+            font-size: 14px;
+            margin-top: 25px;
+        }
+        
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 40px;
+            }
+            
+            .hero p {
+                font-size: 18px;
+            }
+            
+            .buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Dynamic Background Canvas -->
+    <canvas id="backgroundCanvas" class="background-canvas"></canvas>
+    
+    <div class="container">
+        <!-- Navigation Bar -->
+        <nav>
+            <div class="logo">
+                <a href="/"><i class="fas fa-dna"></i> ScCross</a>
+            </div>
+            <div class="nav-links">
+                <a href="/" class="active">Home</a>
+                <a href="/case-studies">Case Studies</a>
+                <a href="/about">About</a>
+            </div>
+            <div class="user-menu" id="userMenu">
+                <!-- Dynamically populated by JavaScript -->
+            </div>
+        </nav>
+        
+        <!-- Message Alert (passed from backend) -->
+        {% if message %}
+        <div class="message-bar">
+            <i class="fas fa-check-circle"></i> {{ message }}
+        </div>
+        {% endif %}
+        
+        <!-- Hero Section -->
+        <section class="hero">
+            <h1>Explore the <span>Infinite Possibilities</span> of Cross-species Single Cell Transcriptomics</h1>
+            <p>ScCross provides a powerful analysis platform integrating data preprocessing, clustering analysis, and visualization to empower your scientific research.</p>
+            <div class="buttons">
+                <a href="/dashboard" class="cta-button">Start Analysis</a>
+                <a href="/all-uploads" class="secondary-button">View Uploaded Data</a>
+                <a href="/upload" class="secondary-button">Upload Data</a>
+            </div>
+        </section>
+        
+        <!-- Features Section -->
+        <section class="features">
+            <div class="section-title">
+                <h2>Core Features</h2>
+                <p>ScCross integrates state-of-the-art cross-species single cell analysis algorithms to provide you with a comprehensive analytical solution.</p>
+            </div>
+            
+            <div class="features-grid">
+                <!-- Feature Card 1: Data Integration -->
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <h3>Data Integration</h3>
+                    <p>Supports cross-species single cell transcriptomics data integration analysis, easily handling multi-species data.</p>       
+                </div>
+                
+                <!-- Feature Card 2: Visualization -->
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-braille"></i>
+                    </div>
+                    <h3>Advanced Visualization</h3>
+                    <p>Provides multiple dimensionality reduction visualization results including UMAP and t-SNE, intuitively displaying data characteristics.</p>
+                </div>
+
+                <!-- Feature Card 3: Intelligent Analysis -->
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-project-diagram"></i>
+                    </div>
+                    <h3>Intelligent Evaluation Analysis</h3>
+                    <p>Utilizes advanced machine learning algorithms to evaluate cross-species single cell transcriptomics integration results.</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Footer -->
+        <footer>
+            <div class="footer-content">
+                <div class="footer-logo">ScCross</div>
+                <p>A platform for cross-species single cell transcriptomics analysis, providing researchers with powerful and intuitive analytical tools.</p>
+                
+                <div class="footer-links">
+                    <a href="#"><i class="fab fa-weibo"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                    <a href="#"><i class="fab fa-medium"></i></a>
+                </div>
+                
+                <div class="copyright">
+                    &copy; 2023 ScCross. All Rights Reserved.
+                </div>
+            </div>
+        </footer>
+    </div>
+    
+    <script>
+        // ========== Dynamic Background Effect ==========
+        const canvas = document.getElementById('backgroundCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        
+        class CellPoint {
+            constructor() {
+                this.reset();
+                this.size = Math.random() * 4 + 1;
+                this.speed = Math.random() * 0.5 + 0.1;
+            }
+            
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * this.speed;
+                this.vy = (Math.random() - 0.5) * this.speed;
+                this.color = this.getRandomColor();
+                this.group = Math.floor(Math.random() * 5);
+                this.life = Math.random() * 200 + 100;
+            }
+            
+            getRandomColor() {
+                const colors = [
+                    'rgba(74, 222, 128, 0.7)',
+                    'rgba(34, 211, 238, 0.7)',
+                    'rgba(249, 115, 22, 0.7)',
+                    'rgba(139, 92, 246, 0.7)',
+                    'rgba(236, 72, 153, 0.7)'
+                ];
+                return colors[this.group];
+            }
+            
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                
+                ctx.shadowColor = this.color;
+                ctx.shadowBlur = 15;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+            
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                
+                this.life--;
+                if (this.life <= 0) {
+                    this.reset();
+                }
+                
+                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+            }
+        }
+        
+        const points = [];
+        const pointCount = 200;
+        
+        for (let i = 0; i < pointCount; i++) {
+            points.push(new CellPoint());
+        }
+        
+        function connectPoints() {
+            for (let i = 0; i < points.length; i++) {
+                for (let j = i + 1; j < points.length; j++) {
+                    const dx = points[i].x - points[j].x;
+                    const dy = points[i].y - points[j].y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < 150) {
+                        const opacity = 1 - distance / 150;
+                        ctx.beginPath();
+                        ctx.strokeStyle = `rgba(148, 163, 184, ${opacity * 0.1})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.moveTo(points[i].x, points[i].y);
+                        ctx.lineTo(points[j].x, points[j].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+        
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const gradient = ctx.createRadialGradient(
+                canvas.width / 2, canvas.height / 2, 0,
+                canvas.width / 2, canvas.height / 2, canvas.width
+            );
+            gradient.addColorStop(0, 'rgba(15, 23, 42, 0.8)');
+            gradient.addColorStop(1, 'rgba(15, 23, 42, 1)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            points.forEach(point => {
+                point.update();
+                point.draw();
+            });
+            
+            connectPoints();
+            
+            requestAnimationFrame(animate);
+        }
+        
+        animate();
+        
+        // ========== Mouse Interaction ==========
+        let mouseX = 0;
+        let mouseY = 0;
+        
+        window.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            
+            points.forEach(point => {
+                const dx = point.x - mouseX;
+                const dy = point.y - mouseY;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < 100) {
+                    const force = (100 - distance) / 100;
+                    point.vx += dx * force * 0.02;
+                    point.vy += dy * force * 0.02;
+                }
+            });
+        });
+
+        // ========== User Login Status Check ==========
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return null;
+        }
+
+        function updateUserMenu() {
+            const username = getCookie('username');
+            const userMenu = document.getElementById('userMenu');
+            
+            if (username) {
+                userMenu.innerHTML = `
+                    <span class="username"><i class="fas fa-user"></i> ${username}</span>
+                    <a href="/dashboard" class="secondary-button" style="padding: 8px 16px; font-size: 14px;">Dashboard</a>
+                `;
+            } else {
+                userMenu.innerHTML = `
+                    <a href="/login" class="cta-button" style="padding: 8px 20px;">Login</a>
+                `;
+            }
+        }
+
+        // Update user menu when page loads
+        window.addEventListener('load', updateUserMenu);
+    </script>
+</body>
+</html>
