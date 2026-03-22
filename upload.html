@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload File - ScCross</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            min-height: 100vh;
+        }
+        
+        .background-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 25px 0;
+        }
+        
+        .logo a {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(90deg, #4ade80, #22d3ee);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+        
+        .nav-links a {
+            color: #94a3b8;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .nav-links a:hover {
+            color: #22d3ee;
+        }
+        
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .username {
+            color: #4ade80;
+            font-weight: 600;
+        }
+        
+        .btn-logout {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid #ef4444;
+            padding: 8px 16px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .btn-logout:hover {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .message-bar {
+            background: rgba(34, 197, 94, 0.2);
+            border: 1px solid #22c55e;
+            color: #22c55e;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid #ef4444;
+            color: #ef4444;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .upload-container {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            border-radius: 16px;
+            padding: 40px;
+            margin: 40px 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .upload-container h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #e2e8f0, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .subtitle {
+            color: #94a3b8;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .file-info {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 30px;
+            font-size: 14px;
+            color: #94a3b8;
+        }
+        
+        .file-info i {
+            color: #22d3ee;
+            margin-right: 8px;
+        }
+        
+        .file-info ul {
+            margin-top: 10px;
+            margin-left: 20px;
+        }
+        
+        .upload-area {
+            border: 2px dashed #334155;
+            border-radius: 12px;
+            padding: 50px;
+            text-align: center;
+            margin-bottom: 25px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .upload-area:hover {
+            border-color: #22d3ee;
+            background: rgba(34, 211, 238, 0.05);
+        }
+        
+        .upload-area i {
+            font-size: 48px;
+            color: #4ade80;
+            margin-bottom: 15px;
+        }
+        
+        .upload-area h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: #e2e8f0;
+        }
+        
+        .upload-area p {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+        
+        .file-name {
+            margin-top: 15px;
+            color: #22d3ee;
+            font-weight: 500;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #94a3b8;
+            font-size: 14px;
+        }
+        
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            color: #e2e8f0;
+            font-size: 16px;
+            transition: all 0.3s;
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #22d3ee;
+            box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.2);
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .btn-primary {
+            flex: 1;
+            padding: 14px;
+            background: linear-gradient(90deg, #0ea5e9, #0d9488);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(14, 165, 233, 0.4);
+        }
+        
+        .btn-secondary {
+            padding: 14px 28px;
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid #334155;
+            color: #e2e8f0;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(51, 65, 85, 0.5);
+            transform: translateY(-3px);
+        }
+        
+        .allowed-formats {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(30, 41, 59, 0.3);
+            border-radius: 8px;
+            font-size: 13px;
+            color: #94a3b8;
+        }
+        
+        .allowed-formats span {
+            display: inline-block;
+            background: #1e293b;
+            padding: 4px 10px;
+            border-radius: 20px;
+            margin: 5px;
+            color: #22d3ee;
+            font-size: 12px;
+        }
+        
+        .back-link {
+            margin: 20px 0;
+        }
+        
+        .back-link a {
+            color: #94a3b8;
+            text-decoration: none;
+        }
+        
+        .back-link a:hover {
+            color: #22d3ee;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            color: #64748b;
+            border-top: 1px solid rgba(148, 163, 184, 0.1);
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="backgroundCanvas" class="background-canvas"></canvas>
+    
+    <div class="container">
+        <nav>
+            <div class="logo">
+                <a href="/">ScCross</a>
+            </div>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/case-studies">Case Studies</a>
+                <a href="/about">About</a>
+            </div>
+            <div class="user-menu">
+                <span class="username"><i class="fas fa-user"></i> {{ username }}</span>
+                <a href="/logout" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </nav>
+        
+        <div class="back-link">
+            <a href="/dashboard"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+        </div>
+        
+        <div class="upload-container">
+            <h1>Upload Data File</h1>
+            <p class="subtitle">Upload your single-cell transcriptomics data for analysis</p>
+            
+            {% if error %}
+            <div class="error-message">
+                <i class="fas fa-exclamation-circle"></i> {{ error }}
+            </div>
+            {% endif %}
+            
+            {% if message %}
+            <div class="message-bar">
+                <i class="fas fa-check-circle"></i> {{ message }}
+            </div>
+            {% endif %}
+            
+            <div class="file-info">
+                <i class="fas fa-info-circle"></i> Maximum file size: 500MB
+                <ul>
+                    <li>Supported formats: .h5ad, .h5, .csv, .tsv, .mtx, .txt, .gz, .rds</li>
+                    <li>Files are stored securely in your private workspace</li>
+                </ul>
+            </div>
+            
+            <form method="POST" action="/upload" enctype="multipart/form-data">
+                <input type="file" id="fileInput" name="file" class="file-input" accept=".h5ad,.h5,.csv,.tsv,.mtx,.txt,.gz,.rds" required>
+                
+                <div class="upload-area" id="uploadArea">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <h3>Click to select or drag and drop</h3>
+                    <p>Choose a file to upload</p>
+                    <div id="selectedFileName" class="file-name"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="description"><i class="fas fa-align-left"></i> Description (optional)</label>
+                    <textarea id="description" name="description" placeholder="Enter a description for this file"></textarea>
+                </div>
+                
+                <div class="allowed-formats">
+                    <strong>Supported formats:</strong>
+                    <span>.h5ad</span> <span>.h5</span> <span>.csv</span> <span>.tsv</span> <span>.mtx</span> <span>.txt</span> <span>.gz</span> <span>.rds</span>
+                </div>
+                
+                <div class="buttons">
+                    <button type="submit" class="btn-primary"><i class="fas fa-upload"></i> Upload File</button>
+                    <a href="/dashboard" class="btn-secondary"><i class="fas fa-times"></i> Cancel</a>
+                </div>
+            </form>
+        </div>
+        
+        <footer>
+            &copy; 2023 ScCross. All Rights Reserved.
+        </footer>
+    </div>
+    
+    <script>
+        const canvas = document.getElementById('backgroundCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        
+        class CellPoint {
+            constructor() {
+                this.reset();
+                this.size = Math.random() * 3 + 1;
+                this.speed = Math.random() * 0.3 + 0.1;
+            }
+            
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * this.speed;
+                this.vy = (Math.random() - 0.5) * this.speed;
+                this.color = this.getRandomColor();
+                this.life = Math.random() * 200 + 100;
+            }
+            
+            getRandomColor() {
+                const colors = [
+                    'rgba(74, 222, 128, 0.5)',
+                    'rgba(34, 211, 238, 0.5)',
+                    'rgba(249, 115, 22, 0.5)'
+                ];
+                return colors[Math.floor(Math.random() * colors.length)];
+            }
+            
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+            
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                
+                this.life--;
+                if (this.life <= 0) this.reset();
+                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+            }
+        }
+        
+        const points = [];
+        for (let i = 0; i < 100; i++) points.push(new CellPoint());
+        
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const gradient = ctx.createRadialGradient(
+                canvas.width/2, canvas.height/2, 0,
+                canvas.width/2, canvas.height/2, canvas.width
+            );
+            gradient.addColorStop(0, 'rgba(15, 23, 42, 0.9)');
+            gradient.addColorStop(1, 'rgba(15, 23, 42, 1)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            points.forEach(point => {
+                point.update();
+                point.draw();
+            });
+            
+            requestAnimationFrame(animate);
+        }
+        
+        animate();
+        
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const selectedFileName = document.getElementById('selectedFileName');
+        
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#22d3ee';
+            uploadArea.style.background = 'rgba(34, 211, 238, 0.05)';
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.style.borderColor = '#334155';
+            uploadArea.style.background = 'transparent';
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#334155';
+            uploadArea.style.background = 'transparent';
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                selectedFileName.textContent = `Selected: ${files[0].name}`;
+            }
+        });
+        
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length > 0) {
+                selectedFileName.textContent = `Selected: ${fileInput.files[0].name}`;
+            } else {
+                selectedFileName.textContent = '';
+            }
+        });
+    </script>
+</body>
+</html>
