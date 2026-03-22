@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Uploads - ScCross</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            min-height: 100vh;
+        }
+        
+        .background-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 25px 0;
+        }
+        
+        .logo a {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(90deg, #4ade80, #22d3ee);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+        
+        .nav-links a {
+            color: #94a3b8;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .nav-links a:hover {
+            color: #22d3ee;
+        }
+        
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .username {
+            color: #4ade80;
+            font-weight: 600;
+        }
+        
+        .btn-logout {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid #ef4444;
+            padding: 8px 16px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .btn-logout:hover {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .page-header {
+            padding: 30px 0;
+        }
+        
+        .page-header h1 {
+            font-size: 32px;
+            background: linear-gradient(90deg, #e2e8f0, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        
+        .page-header p {
+            color: #94a3b8;
+        }
+        
+        .files-table-container {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            border-radius: 16px;
+            padding: 30px;
+            margin: 20px 0 50px;
+            overflow-x: auto;
+        }
+        
+        .files-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .files-table th {
+            text-align: left;
+            padding: 15px;
+            color: #22d3ee;
+            border-bottom: 1px solid #334155;
+            font-weight: 600;
+        }
+        
+        .files-table td {
+            padding: 15px;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+        }
+        
+        .files-table tr:hover {
+            background: rgba(51, 65, 85, 0.3);
+        }
+        
+        .file-type {
+            background: rgba(74, 222, 128, 0.1);
+            color: #4ade80;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            display: inline-block;
+        }
+        
+        .uploader-badge {
+            background: rgba(34, 211, 238, 0.1);
+            color: #22d3ee;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            display: inline-block;
+        }
+        
+        .btn-download {
+            background: none;
+            border: 1px solid #22d3ee;
+            color: #22d3ee;
+            padding: 5px 15px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 12px;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+        
+        .btn-download:hover {
+            background: #22d3ee;
+            color: #0f172a;
+        }
+        
+        .back-link {
+            margin: 20px 0;
+        }
+        
+        .back-link a {
+            color: #94a3b8;
+            text-decoration: none;
+        }
+        
+        .back-link a:hover {
+            color: #22d3ee;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            color: #64748b;
+            border-top: 1px solid rgba(148, 163, 184, 0.1);
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="backgroundCanvas" class="background-canvas"></canvas>
+    
+    <div class="container">
+        <nav>
+            <div class="logo">
+                <a href="/">ScCross</a>
+            </div>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/case-studies">Case Studies</a>
+                <a href="/about">About</a>
+            </div>
+            <div class="user-menu">
+                <span class="username"><i class="fas fa-user"></i> {{ username }}</span>
+                <a href="/logout" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </nav>
+        
+        <div class="back-link">
+            <a href="/dashboard"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+        </div>
+        
+        <div class="page-header">
+            <h1>All Community Uploads</h1>
+            <p>Browse and download datasets uploaded by other researchers</p>
+        </div>
+        
+        <div class="files-table-container">
+            {% if files %}
+            <table class="files-table">
+                <thead>
+                    <tr>
+                        <th>Filename</th>
+                        <th>Type</th>
+                        <th>Size</th>
+                        <th>Uploader</th>
+                        <th>Description</th>
+                        <th>Upload Date</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for file in files %}
+                    <tr>
+                        <td><i class="fas fa-file"></i> {{ file.filename }}</td>
+                        <td><span class="file-type">{{ file.type }}</span></td>
+                        <td>{{ (file.size / 1048576)|round(1) }} MB</td>
+                        <td><span class="uploader-badge"><i class="fas fa-user"></i> {{ file.uploader }}</span></td>
+                        <td>{{ file.description or '-' }}</td>
+                        <td>{{ file.uploaded_at }}</td>
+                        <td><a href="/download/{{ file.id }}" class="btn-download"><i class="fas fa-download"></i> Download</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <h3>No files uploaded yet</h3>
+                <p>Be the first to upload a file!</p>
+            </div>
+            {% endif %}
+        </div>
+        
+        <footer>
+            &copy; 2023 ScCross. All Rights Reserved.
+        </footer>
+    </div>
+    
+    <script>
+        const canvas = document.getElementById('backgroundCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        
+        class CellPoint {
+            constructor() {
+                this.reset();
+                this.size = Math.random() * 3 + 1;
+                this.speed = Math.random() * 0.3 + 0.1;
+            }
+            
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * this.speed;
+                this.vy = (Math.random() - 0.5) * this.speed;
+                this.color = this.getRandomColor();
+                this.life = Math.random() * 200 + 100;
+            }
+            
+            getRandomColor() {
+                const colors = [
+                    'rgba(74, 222, 128, 0.5)',
+                    'rgba(34, 211, 238, 0.5)',
+                    'rgba(249, 115, 22, 0.5)'
+                ];
+                return colors[Math.floor(Math.random() * colors.length)];
+            }
+            
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+            
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                
+                this.life--;
+                if (this.life <= 0) this.reset();
+                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+            }
+        }
+        
+        const points = [];
+        for (let i = 0; i < 100; i++) points.push(new CellPoint());
+        
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const gradient = ctx.createRadialGradient(
+                canvas.width/2, canvas.height/2, 0,
+                canvas.width/2, canvas.height/2, canvas.width
+            );
+            gradient.addColorStop(0, 'rgba(15, 23, 42, 0.9)');
+            gradient.addColorStop(1, 'rgba(15, 23, 42, 1)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            points.forEach(point => {
+                point.update();
+                point.draw();
+            });
+            
+            requestAnimationFrame(animate);
+        }
+        
+        animate();
+    </script>
+</body>
+</html>

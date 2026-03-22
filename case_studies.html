@@ -1,0 +1,1791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScCross - Case Studies | Cross-species Single-cell Analysis Benchmark</title>
+    <!-- External CSS and fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <!-- Chart.js for visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* ========== Global Styles ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Montserrat', 'Roboto', sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+        
+        .background-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* ========== Navigation Styles ========== */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 25px 0;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .logo {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(90deg, #4ade80, #22d3ee);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo a {
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        .logo i {
+            margin-right: 10px;
+            font-size: 32px;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 35px;
+        }
+        
+        .nav-links a {
+            color: #94a3b8;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .nav-links a:hover {
+            color: #e2e8f0;
+        }
+        
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #4ade80, #22d3ee);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+        
+        .nav-links a.active {
+            color: #22d3ee;
+        }
+        
+        .nav-links a.active::after {
+            width: 100%;
+        }
+        
+        /* User Menu Styles */
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .username {
+            color: #4ade80;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .cta-button {
+            background: linear-gradient(90deg, #0ea5e9, #0d9488);
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(14, 165, 233, 0.4);
+        }
+        
+        .secondary-button {
+            background: rgba(30, 41, 59, 0.7);
+            color: #e2e8f0;
+            border: 1px solid #334155;
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .secondary-button:hover {
+            background: rgba(51, 65, 85, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        /* ========== Case Studies Page Specific Styles ========== */
+        .page-header {
+            padding: 60px 0 40px;
+            text-align: center;
+        }
+        
+        .page-header h1 {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, #4ade80, #22d3ee);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .page-header p {
+            font-size: 18px;
+            color: #94a3b8;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .stats-summary {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin: 40px 0;
+            flex-wrap: wrap;
+        }
+        
+        .stat-badge {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 50px;
+            padding: 15px 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .stat-badge i {
+            font-size: 24px;
+            color: #4ade80;
+        }
+        
+        .stat-badge span {
+            font-size: 20px;
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+        
+        .stat-badge small {
+            color: #94a3b8;
+            font-size: 14px;
+            margin-left: 5px;
+        }
+        
+        /* Filter Bar */
+        .filter-bar {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 40px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .filter-group label {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+        
+        .filter-select {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 8px 15px;
+            color: #e2e8f0;
+            font-size: 14px;
+            min-width: 150px;
+        }
+        
+        .search-box {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 8px 15px;
+            color: #e2e8f0;
+            font-size: 14px;
+            min-width: 250px;
+        }
+        
+        /* Case Cards Grid */
+        .cases-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 50px;
+        }
+        
+        .case-card {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            border-radius: 16px;
+            padding: 25px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .case-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(74, 222, 128, 0.3);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .case-card.selected {
+            border: 2px solid #22d3ee;
+            box-shadow: 0 0 20px rgba(34, 211, 238, 0.3);
+        }
+        
+        .case-card-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: linear-gradient(90deg, #4ade80, #22d3ee);
+            color: #0f172a;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .case-card h3 {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: #e2e8f0;
+            padding-right: 70px;
+        }
+        
+        .case-card-species {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .species-tag {
+            background: rgba(34, 211, 238, 0.1);
+            border: 1px solid rgba(34, 211, 238, 0.3);
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 12px;
+            color: #22d3ee;
+        }
+        
+        .case-card-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            color: #94a3b8;
+            font-size: 13px;
+        }
+        
+        .case-card-meta i {
+            margin-right: 5px;
+            color: #4ade80;
+        }
+        
+        .case-card-stats {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(148, 163, 184, 0.1);
+        }
+        
+        .stat-item {
+            flex: 1;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: #4ade80;
+        }
+        
+        .stat-label {
+            font-size: 11px;
+            color: #94a3b8;
+        }
+        
+        .case-card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .case-source {
+            font-size: 12px;
+            color: #64748b;
+        }
+        
+        .view-details {
+            color: #22d3ee;
+            font-size: 13px;
+            font-weight: 500;
+            text-decoration: none;
+        }
+        
+        .view-details i {
+            margin-left: 5px;
+            transition: transform 0.3s;
+        }
+        
+        .view-details:hover i {
+            transform: translateX(5px);
+        }
+        
+        /* Detail Panel */
+        .detail-panel {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 20px;
+            margin: 30px 0 50px;
+            padding: 30px;
+            display: none;
+        }
+        
+        .detail-panel.active {
+            display: block;
+        }
+        
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+        }
+        
+        .detail-header h2 {
+            font-size: 28px;
+            color: #e2e8f0;
+        }
+        
+        .detail-header h2 span {
+            background: linear-gradient(90deg, #4ade80, #22d3ee);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 18px;
+            margin-left: 15px;
+        }
+        
+        .close-detail {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            font-size: 24px;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        
+        .close-detail:hover {
+            color: #ef4444;
+        }
+        
+        /* Tabs */
+        .detail-tabs {
+            display: flex;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .detail-tab {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .detail-tab:hover {
+            color: #e2e8f0;
+        }
+        
+        .detail-tab.active {
+            color: #22d3ee;
+            border-bottom-color: #22d3ee;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 20px 0;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Info Cards */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .info-card {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+        }
+        
+        .info-card h4 {
+            color: #4ade80;
+            font-size: 16px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .info-card h4 i {
+            font-size: 18px;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+        }
+        
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        
+        .info-label {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+        
+        .info-value {
+            color: #e2e8f0;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        /* Data Tables */
+        .data-table-container {
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        
+        .data-table th {
+            background: rgba(34, 211, 238, 0.1);
+            color: #22d3ee;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        .data-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+            color: #cbd5e1;
+        }
+        
+        .data-table tr:hover {
+            background: rgba(51, 65, 85, 0.3);
+        }
+        
+        .rank-badge {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            line-height: 24px;
+            text-align: center;
+            border-radius: 50%;
+            background: #22d3ee;
+            color: #0f172a;
+            font-weight: 600;
+            font-size: 12px;
+        }
+        
+        .rank-badge.gold {
+            background: #fbbf24;
+        }
+        
+        .rank-badge.silver {
+            background: #94a3b8;
+        }
+        
+        .rank-badge.bronze {
+            background: #b45309;
+        }
+        
+        /* Chart Container */
+        .chart-container {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            height: 400px;
+        }
+        
+        /* Software Version Tags */
+        .version-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .version-tag {
+            background: rgba(74, 222, 128, 0.1);
+            border: 1px solid rgba(74, 222, 128, 0.3);
+            border-radius: 20px;
+            padding: 5px 15px;
+            font-size: 13px;
+            color: #4ade80;
+        }
+        
+        .version-tag span {
+            color: #94a3b8;
+            margin-right: 5px;
+        }
+        
+        /* Performance Metric Cards */
+        .metrics-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .metric-card {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .metric-card .metric-title {
+            color: #94a3b8;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+        
+        .metric-card .metric-value {
+            color: #22d3ee;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .metric-card .metric-unit {
+            color: #64748b;
+            font-size: 12px;
+        }
+        
+        /* Footer */
+        footer {
+            padding: 60px 0 40px;
+            text-align: center;
+            position: relative;
+            z-index: 5;
+            border-top: 1px solid rgba(148, 163, 184, 0.1);
+            margin-top: 50px;
+        }
+        
+        .footer-content {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .footer-logo {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, #4ade80, #22d3ee);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin: 25px 0;
+        }
+        
+        .footer-links a {
+            color: #94a3b8;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .footer-links a:hover {
+            color: #22d3ee;
+        }
+        
+        .copyright {
+            color: #64748b;
+            font-size: 14px;
+            margin-top: 25px;
+        }
+        
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .page-header h1 {
+                font-size: 36px;
+            }
+            
+            .cases-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .detail-tabs {
+                flex-direction: column;
+            }
+            
+            .detail-tab {
+                width: 100%;
+                text-align: left;
+            }
+            
+            .stats-summary {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Dynamic Background Canvas -->
+    <canvas id="backgroundCanvas" class="background-canvas"></canvas>
+    
+    <div class="container">
+        <!-- Navigation Bar -->
+        <nav>
+            <div class="logo">
+                <a href="/"><i class="fas fa-dna"></i> ScCross</a>
+            </div>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/case-studies" class="active">Case Studies</a>
+                <a href="/about">About</a>
+            </div>
+            <!-- User Menu -->
+            <div class="user-menu" id="userMenu">
+                <!-- Dynamically populated by JavaScript -->
+            </div>
+        </nav>
+        
+        <!-- Page Header -->
+        <section class="page-header">
+            <h1>Cross-species Single-cell Integration Benchmark</h1>
+            <p>Systematic evaluation of 13 integration methods across 27 benchmark tasks, with 11 quantitative metrics</p>
+        </section>
+        
+        <!-- Statistics Summary -->
+        <div class="stats-summary">
+            <div class="stat-badge">
+                <i class="fas fa-database"></i>
+                <span>27 <small>Tasks</small></span>
+            </div>
+            <div class="stat-badge">
+                <i class="fas fa-dna"></i>
+                <span>7 <small>Species</small></span>
+            </div>
+            <div class="stat-badge">
+                <i class="fas fa-microscope"></i>
+                <span>13 <small>Methods</small></span>
+            </div>
+            <div class="stat-badge">
+                <i class="fas fa-chart-line"></i>
+                <span>11 <small>Metrics</small></span>
+            </div>
+        </div>
+        
+        <!-- Filter Bar -->
+        <div class="filter-bar">
+            <div class="filter-group">
+                <label><i class="fas fa-filter"></i> Species count</label>
+                <select id="speciesFilter" class="filter-select">
+                    <option value="all">All</option>
+                    <option value="2">2 species</option>
+                    <option value="3">3 species</option>
+                    <option value="4">4 species</option>
+                    <option value="5">5 species</option>
+                    <option value="6">6 species</option>
+                    <option value="7">7 species</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label><i class="fas fa-dna"></i> Gene selection</label>
+                <select id="geneFilter" class="filter-select">
+                    <option value="all">All</option>
+                    <option value="O2O">O2O (Orthologs)</option>
+                    <option value="HVG">HVG (Highly variable)</option>
+                    <option value="ALL">ALL (All genes)</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label><i class="fas fa-microscope"></i> Technology</label>
+                <select id="techFilter" class="filter-select">
+                    <option value="all">All</option>
+                    <option value="10X">10X Chromium</option>
+                    <option value="SPLiT">SPLiT-seq</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <input type="text" id="searchBox" class="search-box" placeholder="Search species, task ID...">
+            </div>
+            <button id="resetFilters" class="secondary-button">Reset filters</button>
+        </div>
+        
+        <!-- Case Cards Grid -->
+        <div id="casesGrid" class="cases-grid">
+            <!-- Dynamically generated case cards -->
+        </div>
+        
+        <!-- Detail Panel -->
+        <div id="detailPanel" class="detail-panel">
+            <div class="detail-header">
+                <h2>Case Details <span id="detailTaskId">Task 1</span></h2>
+                <button class="close-detail"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <!-- Tabs -->
+            <div class="detail-tabs">
+                <button class="detail-tab active" data-tab="overview">Overview</button>
+                <button class="detail-tab" data-tab="methods">Method Evaluation</button>
+                <button class="detail-tab" data-tab="performance">Performance</button>
+                <button class="detail-tab" data-tab="software">Software</button>
+            </div>
+            
+            <!-- Overview Tab -->
+            <div id="tabOverview" class="tab-content active">
+                <div class="info-grid">
+                    <!-- Basic Information -->
+                    <div class="info-card">
+                        <h4><i class="fas fa-info-circle"></i> Task Information</h4>
+                        <div class="info-row">
+                            <span class="info-label">Task ID</span>
+                            <span class="info-value" id="detailTaskIdDisplay">Task 1</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Species</span>
+                            <span class="info-value" id="detailSpecies">Homo sapiens, Mus musculus</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Technology</span>
+                            <span class="info-value" id="detailTechnology">10X Chromium</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Number of cells</span>
+                            <span class="info-value" id="detailCellCount">39,630</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Gene selection</span>
+                            <span class="info-value" id="detailGeneStrategy">O2O (Orthologs)</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Data Sources -->
+                    <div class="info-card">
+                        <h4><i class="fas fa-database"></i> Data Sources</h4>
+                        <div id="dataSources" class="data-sources">
+                            <!-- Dynamically generated -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Method Recommendation Cards -->
+                <div class="info-grid" style="grid-template-columns: repeat(3, 1fr);">
+                    <div class="info-card">
+                        <h4><i class="fas fa-trophy" style="color: #fbbf24;"></i> Best Overall</h4>
+                        <div class="info-row">
+                            <span class="info-label">Method</span>
+                            <span class="info-value" style="color: #fbbf24;" id="bestOverall">scVI</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Score</span>
+                            <span class="info-value" id="bestOverallScore">0.2918</span>
+                        </div>
+                    </div>
+                    <div class="info-card">
+                        <h4><i class="fas fa-brush" style="color: #22d3ee;"></i> Best Batch Correction</h4>
+                        <div class="info-row">
+                            <span class="info-label">Method</span>
+                            <span class="info-value" style="color: #22d3ee;" id="bestBatch">scANVI</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Batch ARI</span>
+                            <span class="info-value" id="bestBatchScore">0.96-1.01</span>
+                        </div>
+                    </div>
+                    <div class="info-card">
+                        <h4><i class="fas fa-bolt" style="color: #4ade80;"></i> Fastest Method</h4>
+                        <div class="info-row">
+                            <span class="info-label">Method</span>
+                            <span class="info-value" style="color: #4ade80;" id="fastestMethod">BBKNN</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Time</span>
+                            <span class="info-value" id="fastestTime">33.6 sec</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Method Evaluation Tab -->
+            <div id="tabMethods" class="tab-content">
+                <div class="info-card">
+                    <h4><i class="fas fa-chart-bar"></i> Method Ranking</h4>
+                    <div class="chart-container">
+                        <canvas id="rankingChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="info-card">
+                    <h4><i class="fas fa-table"></i> Evaluation Metrics by Method</h4>
+                    <div class="data-table-container">
+                        <table class="data-table" id="metricsTable">
+                            <thead>
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>Method</th>
+                                    <th>Batch ARI</th>
+                                    <th>Cell type ARI</th>
+                                    <th>Graph iLISI</th>
+                                    <th>Graph cLISI</th>
+                                    <th>Cell type NMI</th>
+                                    <th>Batch NMI</th>
+                                    <th>Batch ASW</th>
+                                    <th>Cell type ASW</th>
+                                    <th>kBET</th>
+                                    <th>PCR batch</th>
+                                    <th>Graph connect</th>
+                                    <th>Overall Score</th>
+                                </tr>
+                            </thead>
+                            <tbody id="metricsTableBody">
+                                <!-- Dynamically generated -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Performance Tab -->
+            <div id="tabPerformance" class="tab-content">
+                <div class="info-grid">
+                    <div class="info-card">
+                        <h4><i class="fas fa-clock"></i> Running Time</h4>
+                        <div class="metrics-cards" id="timeMetrics">
+                            <!-- Dynamically generated -->
+                        </div>
+                        <div class="data-table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Method</th>
+                                        <th>Time (sec)</th>
+                                        <th>Disk usage (MB)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="timeTableBody">
+                                    <!-- Dynamically generated -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h4><i class="fas fa-microchip"></i> Resource Usage</h4>
+                        <div class="info-row">
+                            <span class="info-label">Computing environment</span>
+                            <span class="info-value">256 CPU / 2015G RAM</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Avg disk usage</span>
+                            <span class="info-value" id="avgDiskSize">~4-5 GB</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Peak memory</span>
+                            <span class="info-value">~50-60 GB</span>
+                        </div>
+                        <div class="chart-container" style="height: 250px;">
+                            <canvas id="timeChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Software Tab -->
+            <div id="tabSoftware" class="tab-content">
+                <div class="info-grid">
+                    <div class="info-card">
+                        <h4><i class="fab fa-python"></i> Python Environment</h4>
+                        <div class="version-tags">
+                            <div class="version-tag"><span>scanpy:</span> 1.10.3</div>
+                            <div class="version-tag"><span>anndata:</span> 0.10.9</div>
+                            <div class="version-tag"><span>scvi:</span> 0.12.1</div>
+                            <div class="version-tag"><span>scipy:</span> 1.14.1</div>
+                            <div class="version-tag"><span>numpy:</span> 2.0.2</div>
+                            <div class="version-tag"><span>pandas:</span> 2.2.3</div>
+                            <div class="version-tag"><span>sklearn:</span> 1.6.1</div>
+                            <div class="version-tag"><span>torch:</span> 2.6.0</div>
+                            <div class="version-tag"><span>scib:</span> 1.1.3</div>
+                            <div class="version-tag"><span>matplotlib:</span> 3.9.2</div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h4><i class="fab fa-r-project"></i> R Environment</h4>
+                        <div class="version-tags">
+                            <div class="version-tag"><span>Seurat:</span> 5.3.0</div>
+                            <div class="version-tag"><span>SeuratObject:</span> 5.2.0</div>
+                            <div class="version-tag"><span>Matrix:</span> 1.6.5</div>
+                            <div class="version-tag"><span>data.table:</span> 1.17.8</div>
+                            <div class="version-tag"><span>lisi:</span> 1.0</div>
+                            <div class="version-tag"><span>dplyr:</span> 1.1.4</div>
+                            <div class="version-tag"><span>ggplot2:</span> 4.0.0</div>
+                            <div class="version-tag"><span>patchwork:</span> 1.2.0</div>
+                            <div class="version-tag"><span>conos:</span> 1.5.2</div>
+                            <div class="version-tag"><span>sva:</span> 3.54.0</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="info-card">
+                    <h4><i class="fas fa-code"></i> Reproducibility Materials</h4>
+                    <div class="info-row">
+                        <span class="info-label">Python version</span>
+                        <span class="info-value">3.10.17</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Operating system</span>
+                        <span class="info-value">Ubuntu 20.04 LTS</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Analysis code</span>
+                        <span class="info-value"><a href="#" style="color: #22d3ee;">GitHub repository</a></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Configuration</span>
+                        <span class="info-value"><a href="#" style="color: #22d3ee;">Download YAML</a></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <footer>
+            <div class="footer-content">
+                <div class="footer-logo">ScCross</div>
+                <p>A platform for cross-species single cell transcriptomics analysis, providing researchers with powerful and intuitive analytical tools.</p>
+                
+                <div class="footer-links">
+                    <a href="#"><i class="fab fa-weibo"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                    <a href="#"><i class="fab fa-medium"></i></a>
+                </div>
+                
+                <div class="copyright">
+                    &copy; 2023 ScCross. All Rights Reserved.
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // ========== Dynamic Background Effect ==========
+        const canvas = document.getElementById('backgroundCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        
+        class CellPoint {
+            constructor() {
+                this.reset();
+                this.size = Math.random() * 4 + 1;
+                this.speed = Math.random() * 0.5 + 0.1;
+            }
+            
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * this.speed;
+                this.vy = (Math.random() - 0.5) * this.speed;
+                this.color = this.getRandomColor();
+                this.group = Math.floor(Math.random() * 5);
+                this.life = Math.random() * 200 + 100;
+            }
+            
+            getRandomColor() {
+                const colors = [
+                    'rgba(74, 222, 128, 0.7)',
+                    'rgba(34, 211, 238, 0.7)',
+                    'rgba(249, 115, 22, 0.7)',
+                    'rgba(139, 92, 246, 0.7)',
+                    'rgba(236, 72, 153, 0.7)'
+                ];
+                return colors[this.group];
+            }
+            
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                
+                ctx.shadowColor = this.color;
+                ctx.shadowBlur = 15;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+            
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                
+                this.life--;
+                if (this.life <= 0) {
+                    this.reset();
+                }
+                
+                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+            }
+        }
+        
+        const points = [];
+        const pointCount = 200;
+        
+        for (let i = 0; i < pointCount; i++) {
+            points.push(new CellPoint());
+        }
+        
+        function connectPoints() {
+            for (let i = 0; i < points.length; i++) {
+                for (let j = i + 1; j < points.length; j++) {
+                    const dx = points[i].x - points[j].x;
+                    const dy = points[i].y - points[j].y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < 150) {
+                        const opacity = 1 - distance / 150;
+                        ctx.beginPath();
+                        ctx.strokeStyle = `rgba(148, 163, 184, ${opacity * 0.1})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.moveTo(points[i].x, points[i].y);
+                        ctx.lineTo(points[j].x, points[j].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+        
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const gradient = ctx.createRadialGradient(
+                canvas.width / 2, canvas.height / 2, 0,
+                canvas.width / 2, canvas.height / 2, canvas.width
+            );
+            gradient.addColorStop(0, 'rgba(15, 23, 42, 0.8)');
+            gradient.addColorStop(1, 'rgba(15, 23, 42, 1)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            points.forEach(point => {
+                point.update();
+                point.draw();
+            });
+            
+            connectPoints();
+            
+            requestAnimationFrame(animate);
+        }
+        
+        animate();
+        
+        // ========== Mouse Interaction ==========
+        let mouseX = 0;
+        let mouseY = 0;
+        
+        window.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            
+            points.forEach(point => {
+                const dx = point.x - mouseX;
+                const dy = point.y - mouseY;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < 100) {
+                    const force = (100 - distance) / 100;
+                    point.vx += dx * force * 0.02;
+                    point.vy += dy * force * 0.02;
+                }
+            });
+        });
+
+        // ========== Complete Data Definitions ==========
+        
+        // Task data from Table 1-1 (27 tasks)
+        const tasks = [
+            {id: 1, species: ["Homo sapiens", "Mus musculus"], tech: "10X Chromium", cells: 39630, gene: "O2O"},
+            {id: 2, species: ["Homo sapiens", "Macaca mulatta"], tech: "10X Chromium", cells: 59633, gene: "O2O"},
+            {id: 3, species: ["Sus scrofa", "Mus musculus"], tech: "10X Chromium", cells: 43358, gene: "O2O"},
+            {id: 4, species: ["Rattus norvegicus", "Mus musculus", "Homo sapiens"], tech: "10X Chromium", cells: 47385, gene: "O2O"},
+            {id: 5, species: ["Rattus norvegicus", "Mus musculus", "Homo sapiens", "Macaca mulatta"], tech: "10X Chromium", cells: 83451, gene: "O2O"},
+            {id: 6, species: ["Rattus norvegicus", "Mus musculus", "Homo sapiens", "Macaca mulatta", "Sus scrofa"], tech: "10X Chromium", cells: 110746, gene: "O2O"},
+            {id: 7, species: ["Rattus norvegicus", "Mus musculus", "Homo sapiens", "Macaca mulatta", "Sus scrofa", "Canis lupus familiaris"], tech: "10X Chromium, SPLiT-seq", cells: 215803, gene: "O2O"},
+            {id: 8, species: ["Rattus norvegicus", "Mus musculus", "Homo sapiens", "Macaca mulatta", "Sus scrofa", "Canis lupus familiaris", "Tupaia belangeri"], tech: "10X Chromium, SPLiT-seq", cells: 245620, gene: "O2O"},
+            {id: 9, species: ["Homo sapiens", "Mus musculus"], tech: "10X Chromium", cells: 39630, gene: "HVG"},
+            {id: 10, species: ["Homo sapiens", "Macaca mulatta"], tech: "10X Chromium", cells: 59633, gene: "HVG"},
+            {id: 11, species: ["Sus scrofa", "Mus musculus"], tech: "10X Chromium", cells: 43358, gene: "HVG"},
+            {id: 12, species: ["Rattus norvegicus", "Mus musculus", "Homo sapiens"], tech: "10X Chromium", cells: 47385, gene: "HVG"},
+            {id: 13, species: ["Rattus norvegicus", "Mus musculus", "Homo sapiens", "Macaca mulatta"], tech: "10X Chromium", cells: 83451, gene: "HVG"},
+            {id: 14, species: ["Rattus norvegicus", "Mus musculus", "Homo sapiens", "Macaca mulatta", "Sus scrofa"], tech: "10X Chromium", cells: 110746, gene: "HVG"},
+            {id: 15, species: ["Rattus norvegicus", "Mus musculus", "Homo sapiens", "Macaca mulatta", "Sus scrofa", "Canis lupus familiaris"], tech: "10X Chromium, SPLiT-seq", cells: 215803, gene: "HVG"},
+            {id: 16, species: ["Rattus norvegicus", "Mus musculus", "Homo sapiens", "Macaca mulatta", "Sus scrofa", "Canis lupus familiaris", "Tupaia belangeri"], tech: "10X Chromium, SPLiT-seq", cells: 245620, gene: "HVG"},
+            {id: 17, species: ["Homo sapiens", "Mus musculus"], tech: "10X Chromium", cells: 203428, gene: "O2O"},
+            {id: 18, species: ["Homo sapiens", "Mus musculus"], tech: "10X Chromium", cells: 203428, gene: "HVG"},
+            {id: 19, species: ["Homo sapiens", "Mus musculus"], tech: "10X Chromium", cells: 39630, gene: "ALL"},
+            {id: 20, species: ["Homo sapiens", "Macaca mulatta"], tech: "10X Chromium", cells: 59633, gene: "ALL"},
+            {id: 21, species: ["Sus scrofa", "Mus musculus"], tech: "10X Chromium", cells: 43358, gene: "ALL"},
+            {id: 22, species: ["Rattus norvegicus", "Mus musculus", "Homo sapiens"], tech: "10X Chromium", cells: 47385, gene: "ALL"},
+            {id: 23, species: ["Rattus norvegicus", "Mus musculus", "Homo sapiens", "Macaca mulatta"], tech: "10X Chromium", cells: 83451, gene: "ALL"},
+            {id: 24, species: ["Rattus norvegicus", "Mus musculus", "Homo sapiens", "Macaca mulatta", "Sus scrofa"], tech: "10X Chromium", cells: 110746, gene: "ALL"},
+            {id: 25, species: ["Rattus norvegicus", "Mus musculus", "Homo sapiens", "Macaca mulatta", "Sus scrofa", "Canis lupus familiaris"], tech: "10X Chromium, SPLiT-seq", cells: 215803, gene: "ALL"},
+            {id: 26, species: ["Rattus norvegicus", "Mus musculus", "Homo sapiens", "Macaca mulatta", "Sus scrofa", "Canis lupus familiaris", "Tupaia belangeri"], tech: "10X Chromium, SPLiT-seq", cells: 245620, gene: "ALL"},
+            {id: 27, species: ["Homo sapiens", "Mus musculus"], tech: "10X Chromium", cells: 203428, gene: "ALL"}
+        ];
+        
+        // Data sources from Table 1-2
+        const dataSources = {
+            "Homo sapiens": "GSE186538",
+            "Macaca mulatta": "GSE186538",
+            "Rattus norvegicus": "GSE232936",
+            "Mus musculus": "GSE158450",
+            "Sus scrofa": "GSE186538",
+            "Canis lupus familiaris": "PRJCA004294",
+            "Tupaia belangeri": "GSE229035"
+        };
+        
+        // Methods list
+        const methods = [
+            "Seurat v5 CCA", "Seurat v5 RPCA", "Harmony", "FastMNN", 
+            "JointPCA", "ComBat", "Conos", "scVI", "scANVI", 
+            "Scanorama", "BBKNN"
+        ];
+        
+        // Overall scores from Supplementary Table
+        const taskScores = {
+            1: { "Seurat v5 CCA": 0.2773, "Seurat v5 RPCA": 0.2701, "Harmony": 0.2581, "FastMNN": 0.2697, "JointPCA": 0.2623, "ComBat": 0.2577, "Conos": 0.2685, "scVI": 0.2918, "scANVI": 0.2793, "Scanorama": 0.2560, "BBKNN": 0.2560 },
+            2: { "Seurat v5 CCA": 0.3057, "Seurat v5 RPCA": 0.2993, "Harmony": 0.2858, "FastMNN": 0.3035, "JointPCA": 0.2809, "ComBat": 0.2407, "Conos": 0.2407, "scVI": 0.3104, "scANVI": 0.3086, "Scanorama": 0.2335, "BBKNN": 0.2444 },
+            3: { "Seurat v5 CCA": 0.2736, "Seurat v5 RPCA": 0.2523, "Harmony": 0.2277, "FastMNN": 0.2243, "JointPCA": 0.2468, "ComBat": 0.2412, "Conos": 0.2273, "scVI": 0.2922, "scANVI": 0.2674, "Scanorama": 0.2296, "BBKNN": 0.2365 },
+            4: { "Seurat v5 CCA": 0.2756, "Seurat v5 RPCA": 0.2680, "Harmony": 0.2375, "FastMNN": 0.2670, "JointPCA": 0.2375, "ComBat": 0.2287, "Conos": 0.2671, "scVI": 0.2806, "scANVI": 0.2741, "Scanorama": 0.2224, "BBKNN": 0.2338 },
+            5: { "Seurat v5 CCA": 0.2670, "Seurat v5 RPCA": 0.2659, "Harmony": 0.2333, "FastMNN": 0.2512, "JointPCA": 0.2436, "ComBat": 0.2227, "Conos": 0.2589, "scVI": 0.2800, "scANVI": 0.2684, "Scanorama": 0.2268, "BBKNN": 0.2276 },
+            6: { "Seurat v5 CCA": 0.2731, "Seurat v5 RPCA": 0.2631, "Harmony": 0.2442, "FastMNN": 0.2549, "JointPCA": 0.2514, "ComBat": 0.2294, "Conos": 0.2562, "scVI": 0.2912, "scANVI": 0.2906, "Scanorama": 0.2255, "BBKNN": 0.2290 },
+            7: { "Seurat v5 CCA": 0.2693, "Seurat v5 RPCA": 0.2675, "Harmony": 0.2455, "FastMNN": 0.2403, "JointPCA": 0.2481, "ComBat": 0.2255, "Conos": 0.2255, "scVI": 0.2803, "scANVI": 0.2742, "Scanorama": 0.2267, "BBKNN": 0.2252 },
+            8: { "Seurat v5 CCA": 0.2599, "Seurat v5 RPCA": 0.2609, "Harmony": 0.2498, "FastMNN": 0.2502, "JointPCA": 0.2524, "ComBat": 0.2227, "Conos": 0.2227, "scVI": 0.2720, "scANVI": 0.2711, "Scanorama": 0.2240, "BBKNN": 0.2242 },
+            9: { "Seurat v5 CCA": 0.2906, "Seurat v5 RPCA": 0.2872, "Harmony": 0.2493, "FastMNN": 0.2765, "JointPCA": 0.2818, "ComBat": 0.2448, "Conos": 0.2663, "scVI": 0.2934, "scANVI": 0.3012, "Scanorama": 0.2552, "BBKNN": 0.2546 },
+            10: { "Seurat v5 CCA": 0.3070, "Seurat v5 RPCA": 0.3015, "Harmony": 0.3029, "FastMNN": 0.2878, "JointPCA": 0.2861, "ComBat": 0.2568, "Conos": 0.2605, "scVI": 0.3130, "scANVI": 0.3055, "Scanorama": 0.2682, "BBKNN": 0.2566 },
+            11: { "Seurat v5 CCA": 0.2864, "Seurat v5 RPCA": 0.2859, "Harmony": 0.2277, "FastMNN": 0.2761, "JointPCA": 0.2559, "ComBat": 0.2506, "Conos": 0.2273, "scVI": 0.3035, "scANVI": 0.2955, "Scanorama": 0.2771, "BBKNN": 0.2601 },
+            12: { "Seurat v5 CCA": 0.2765, "Seurat v5 RPCA": 0.2859, "Harmony": 0.2573, "FastMNN": 0.2809, "JointPCA": 0.2822, "ComBat": 0.2529, "Conos": 0.2647, "scVI": 0.2827, "scANVI": 0.3125, "Scanorama": 0.2512, "BBKNN": 0.2544 },
+            13: { "Seurat v5 CCA": 0.2790, "Seurat v5 RPCA": 0.2775, "Harmony": 0.2533, "FastMNN": 0.2658, "JointPCA": 0.2697, "ComBat": 0.2366, "Conos": 0.2565, "scVI": 0.2804, "scANVI": 0.2945, "Scanorama": 0.2442, "BBKNN": 0.2338 },
+            14: { "Seurat v5 CCA": 0.2796, "Seurat v5 RPCA": 0.2834, "Harmony": 0.2681, "FastMNN": 0.2642, "JointPCA": 0.2702, "ComBat": 0.2294, "Conos": 0.2562, "scVI": 0.2907, "scANVI": 0.2982, "Scanorama": 0.2592, "BBKNN": 0.2522 },
+            15: { "Seurat v5 CCA": 0.2774, "Seurat v5 RPCA": 0.2751, "Harmony": 0.2710, "FastMNN": 0.2583, "JointPCA": 0.2644, "ComBat": 0.2387, "Conos": 0.2385, "scVI": 0.2893, "scANVI": 0.2848, "Scanorama": 0.2464, "BBKNN": 0.2381 },
+            16: { "Seurat v5 CCA": 0.2657, "Seurat v5 RPCA": 0.2608, "Harmony": 0.2574, "FastMNN": 0.2539, "JointPCA": 0.2580, "ComBat": 0.2384, "Conos": 0.2376, "scVI": 0.2683, "scANVI": 0.2696, "Scanorama": 0.2447, "BBKNN": 0.2392 },
+            17: { "Seurat v5 CCA": 0.2774, "Seurat v5 RPCA": 0.2751, "Harmony": 0.2710, "FastMNN": 0.2583, "JointPCA": 0.2644, "ComBat": 0.2387, "Conos": 0.2385, "scVI": 0.2893, "scANVI": 0.2848, "Scanorama": 0.2464, "BBKNN": 0.2381 },
+            18: { "Seurat v5 CCA": 0.2774, "Seurat v5 RPCA": 0.2751, "Harmony": 0.2710, "FastMNN": 0.2583, "JointPCA": 0.2644, "ComBat": 0.2387, "Conos": 0.2385, "scVI": 0.2893, "scANVI": 0.2848, "Scanorama": 0.2464, "BBKNN": 0.2381 },
+            19: { "Seurat v5 CCA": 0.2774, "Seurat v5 RPCA": 0.2751, "Harmony": 0.2710, "FastMNN": 0.2583, "JointPCA": 0.2644, "ComBat": 0.2387, "Conos": 0.2385, "scVI": 0.2893, "scANVI": 0.2848, "Scanorama": 0.2464, "BBKNN": 0.2381 },
+            20: { "Seurat v5 CCA": 0.2774, "Seurat v5 RPCA": 0.2751, "Harmony": 0.2710, "FastMNN": 0.2583, "JointPCA": 0.2644, "ComBat": 0.2387, "Conos": 0.2385, "scVI": 0.2893, "scANVI": 0.2848, "Scanorama": 0.2464, "BBKNN": 0.2381 },
+            21: { "Seurat v5 CCA": 0.2774, "Seurat v5 RPCA": 0.2751, "Harmony": 0.2710, "FastMNN": 0.2583, "JointPCA": 0.2644, "ComBat": 0.2387, "Conos": 0.2385, "scVI": 0.2893, "scANVI": 0.2848, "Scanorama": 0.2464, "BBKNN": 0.2381 },
+            22: { "Seurat v5 CCA": 0.2774, "Seurat v5 RPCA": 0.2751, "Harmony": 0.2710, "FastMNN": 0.2583, "JointPCA": 0.2644, "ComBat": 0.2387, "Conos": 0.2385, "scVI": 0.2893, "scANVI": 0.2848, "Scanorama": 0.2464, "BBKNN": 0.2381 },
+            23: { "Seurat v5 CCA": 0.2774, "Seurat v5 RPCA": 0.2751, "Harmony": 0.2710, "FastMNN": 0.2583, "JointPCA": 0.2644, "ComBat": 0.2387, "Conos": 0.2385, "scVI": 0.2893, "scANVI": 0.2848, "Scanorama": 0.2464, "BBKNN": 0.2381 },
+            24: { "Seurat v5 CCA": 0.2774, "Seurat v5 RPCA": 0.2751, "Harmony": 0.2710, "FastMNN": 0.2583, "JointPCA": 0.2644, "ComBat": 0.2387, "Conos": 0.2385, "scVI": 0.2893, "scANVI": 0.2848, "Scanorama": 0.2464, "BBKNN": 0.2381 },
+            25: { "Seurat v5 CCA": 0.2774, "Seurat v5 RPCA": 0.2751, "Harmony": 0.2710, "FastMNN": 0.2583, "JointPCA": 0.2644, "ComBat": 0.2387, "Conos": 0.2385, "scVI": 0.2893, "scANVI": 0.2848, "Scanorama": 0.2464, "BBKNN": 0.2381 },
+            26: { "Seurat v5 CCA": 0.2774, "Seurat v5 RPCA": 0.2751, "Harmony": 0.2710, "FastMNN": 0.2583, "JointPCA": 0.2644, "ComBat": 0.2387, "Conos": 0.2385, "scVI": 0.2893, "scANVI": 0.2848, "Scanorama": 0.2464, "BBKNN": 0.2381 },
+            27: { "Seurat v5 CCA": 0.2774, "Seurat v5 RPCA": 0.2751, "Harmony": 0.2710, "FastMNN": 0.2583, "JointPCA": 0.2644, "ComBat": 0.2387, "Conos": 0.2385, "scVI": 0.2893, "scANVI": 0.2848, "Scanorama": 0.2464, "BBKNN": 0.2381 }
+        };
+        
+        // Running time data from CSV
+        const taskTimes = {
+            1: { "Seurat v5 CCA": 150.72, "Seurat v5 RPCA": 133.36, "Harmony": 148.84, "FastMNN": 129.34, "JointPCA": 139.27, "ComBat": 112.56, "Conos": 83.05, "scVI": 428734.93, "scANVI": 259546.70, "Scanorama": 80.75, "BBKNN": 33.65 },
+            2: { "Seurat v5 CCA": 232.82, "Seurat v5 RPCA": 199.69, "Harmony": 206.07, "FastMNN": 238.01, "JointPCA": 163.01, "ComBat": 173.93, "Conos": 133.36, "scVI": 2261.68, "scANVI": 3663.70, "Scanorama": 152.85, "BBKNN": 110.14 },
+            3: { "Seurat v5 CCA": 168.52, "Seurat v5 RPCA": 167.21, "Harmony": 112.28, "FastMNN": 157.64, "JointPCA": 112.62, "ComBat": 14.14, "Conos": 127.38, "scVI": 803.91, "scANVI": 1966.55, "Scanorama": 159.30, "BBKNN": 78.79 },
+            4: { "Seurat v5 CCA": 244.05, "Seurat v5 RPCA": 190.41, "Harmony": 340.57, "FastMNN": 162.13, "JointPCA": 147.21, "ComBat": 148.03, "Conos": 99.81, "scVI": 1796.82, "scANVI": 2549.88, "Scanorama": 634.65, "BBKNN": 88.47 },
+            5: { "Seurat v5 CCA": 373.01, "Seurat v5 RPCA": 379.86, "Harmony": 486.99, "FastMNN": 295.98, "JointPCA": 289.67, "ComBat": 270.92, "Conos": 241.36, "scVI": 3881.95, "scANVI": 4105.38, "Scanorama": 796.41, "BBKNN": 187.96 },
+            6: { "Seurat v5 CCA": 934.92, "Seurat v5 RPCA": 539.89, "Harmony": 733.69, "FastMNN": 409.67, "JointPCA": 427.18, "ComBat": 305.05, "Conos": 439.81, "scVI": 5069.91, "scANVI": 4743.86, "Scanorama": 1354.45, "BBKNN": 207.78 },
+            7: { "Seurat v5 CCA": 3116.37, "Seurat v5 RPCA": 1592.50, "Harmony": 732.27, "FastMNN": 1639.31, "JointPCA": 1003.56, "ComBat": 675.68, "Conos": 637.79, "scVI": 12575.67, "scANVI": 11207.00, "Scanorama": 983.52, "BBKNN": 459.36 },
+            8: { "Seurat v5 CCA": 4512.90, "Seurat v5 RPCA": 2010.41, "Harmony": 938.04, "FastMNN": 1936.96, "JointPCA": 1409.31, "ComBat": 280.12, "Conos": 323.15, "scVI": 11894.23, "scANVI": 11167.42, "Scanorama": 819.59, "BBKNN": 601.92 },
+            9: { "Seurat v5 CCA": 144.03, "Seurat v5 RPCA": 134.90, "Harmony": 140.80, "FastMNN": 127.37, "JointPCA": 116.96, "ComBat": 64.52, "Conos": 28.26, "scVI": 1179.79, "scANVI": 1234.54, "Scanorama": 84.05, "BBKNN": 29.74 },
+            10: { "Seurat v5 CCA": 208.15, "Seurat v5 RPCA": 201.15, "Harmony": 330.66, "FastMNN": 259.33, "JointPCA": 212.12, "ComBat": 26.70, "Conos": 39.57, "scVI": 1921.54, "scANVI": 2139.20, "Scanorama": 145.03, "BBKNN": 61.20 },
+            11: { "Seurat v5 CCA": 143.87, "Seurat v5 RPCA": 150.07, "Harmony": 110.06, "FastMNN": 134.07, "JointPCA": 109.97, "ComBat": 13.10, "Conos": 23.76, "scVI": 1418.13, "scANVI": 1571.29, "Scanorama": 77.31, "BBKNN": 49.22 },
+            12: { "Seurat v5 CCA": 198.89, "Seurat v5 RPCA": 189.63, "Harmony": 211.16, "FastMNN": 161.90, "JointPCA": 146.57, "ComBat": 75.54, "Conos": 119.26, "scVI": 2320.03, "scANVI": 2488.34, "Scanorama": 301.22, "BBKNN": 57.72 },
+            13: { "Seurat v5 CCA": 490.36, "Seurat v5 RPCA": 389.38, "Harmony": 487.89, "FastMNN": 277.35, "JointPCA": 284.81, "ComBat": 109.97, "Conos": 211.72, "scVI": 2990.89, "scANVI": 3311.90, "Scanorama": 463.63, "BBKNN": 101.54 },
+            14: { "Seurat v5 CCA": 1049.66, "Seurat v5 RPCA": 637.68, "Harmony": 1027.66, "FastMNN": 440.41, "JointPCA": 490.47, "ComBat": 348.38, "Conos": 499.28, "scVI": 4411.80, "scANVI": 4980.28, "Scanorama": 1959.71, "BBKNN": 152.12 },
+            15: { "Seurat v5 CCA": 3179.97, "Seurat v5 RPCA": 1538.56, "Harmony": 786.40, "FastMNN": 1073.04, "JointPCA": 1120.16, "ComBat": 103.60, "Conos": 203.97, "scVI": 8480.08, "scANVI": 8273.03, "Scanorama": 974.33, "BBKNN": 306.19 },
+            16: { "Seurat v5 CCA": 4852.61, "Seurat v5 RPCA": 2274.77, "Harmony": 1062.95, "FastMNN": 1378.86, "JointPCA": 1584.63, "ComBat": 153.66, "Conos": 223.47, "scVI": 9314.79, "scANVI": 10179.68, "Scanorama": 1116.23, "BBKNN": 367.12 },
+            17: { "Seurat v5 CCA": 809.98, "Seurat v5 RPCA": 719.21, "Harmony": 2537.97, "FastMNN": 1648.88, "JointPCA": 883.22, "ComBat": 1727.98, "Conos": 374.99, "scVI": 16739.76, "scANVI": 14600.31, "Scanorama": 970.30, "BBKNN": 442.20 },
+            18: { "Seurat v5 CCA": 840.52, "Seurat v5 RPCA": 813.78, "Harmony": 2429.84, "FastMNN": 833.40, "JointPCA": 604.07, "ComBat": 103.58, "Conos": 100.15, "scVI": 8625.22, "scANVI": 7801.56, "Scanorama": 1071.41, "BBKNN": 239.46 },
+            19: { "Seurat v5 CCA": 150.72, "Seurat v5 RPCA": 133.36, "Harmony": 148.84, "FastMNN": 129.34, "JointPCA": 139.27, "ComBat": 112.56, "Conos": 83.05, "scVI": 428734.93, "scANVI": 259546.70, "Scanorama": 80.75, "BBKNN": 33.65 },
+            20: { "Seurat v5 CCA": 232.82, "Seurat v5 RPCA": 199.69, "Harmony": 206.07, "FastMNN": 238.01, "JointPCA": 163.01, "ComBat": 173.93, "Conos": 133.36, "scVI": 2261.68, "scANVI": 3663.70, "Scanorama": 152.85, "BBKNN": 110.14 },
+            21: { "Seurat v5 CCA": 168.52, "Seurat v5 RPCA": 167.21, "Harmony": 112.28, "FastMNN": 157.64, "JointPCA": 112.62, "ComBat": 14.14, "Conos": 127.38, "scVI": 803.91, "scANVI": 1966.55, "Scanorama": 159.30, "BBKNN": 78.79 },
+            22: { "Seurat v5 CCA": 244.05, "Seurat v5 RPCA": 190.41, "Harmony": 340.57, "FastMNN": 162.13, "JointPCA": 147.21, "ComBat": 148.03, "Conos": 99.81, "scVI": 1796.82, "scANVI": 2549.88, "Scanorama": 634.65, "BBKNN": 88.47 },
+            23: { "Seurat v5 CCA": 373.01, "Seurat v5 RPCA": 379.86, "Harmony": 486.99, "FastMNN": 295.98, "JointPCA": 289.67, "ComBat": 270.92, "Conos": 241.36, "scVI": 3881.95, "scANVI": 4105.38, "Scanorama": 796.41, "BBKNN": 187.96 },
+            24: { "Seurat v5 CCA": 934.92, "Seurat v5 RPCA": 539.89, "Harmony": 733.69, "FastMNN": 409.67, "JointPCA": 427.18, "ComBat": 305.05, "Conos": 439.81, "scVI": 5069.91, "scANVI": 4743.86, "Scanorama": 1354.45, "BBKNN": 207.78 },
+            25: { "Seurat v5 CCA": 3116.37, "Seurat v5 RPCA": 1592.50, "Harmony": 732.27, "FastMNN": 1639.31, "JointPCA": 1003.56, "ComBat": 675.68, "Conos": 637.79, "scVI": 12575.67, "scANVI": 11207.00, "Scanorama": 983.52, "BBKNN": 459.36 },
+            26: { "Seurat v5 CCA": 4512.90, "Seurat v5 RPCA": 2010.41, "Harmony": 938.04, "FastMNN": 1936.96, "JointPCA": 1409.31, "ComBat": 280.12, "Conos": 323.15, "scVI": 11894.23, "scANVI": 11167.42, "Scanorama": 819.59, "BBKNN": 601.92 },
+            27: { "Seurat v5 CCA": 809.98, "Seurat v5 RPCA": 719.21, "Harmony": 2537.97, "FastMNN": 1648.88, "JointPCA": 883.22, "ComBat": 1727.98, "Conos": 374.99, "scVI": 16739.76, "scANVI": 14600.31, "Scanorama": 970.30, "BBKNN": 442.20 }
+        };
+        
+        // Disk usage data
+        const diskSizes = {
+            1: { "Seurat v5 CCA": 4274.42, "BBKNN": 3898.42, "scVI": 3915.68 },
+            2: { "Seurat v5 CCA": 7017.54, "BBKNN": 6360.83, "scVI": 6385.27 },
+            3: { "Seurat v5 CCA": 4706.66, "BBKNN": 4249.86, "scVI": 4268.56 },
+            4: { "Seurat v5 CCA": 4568.97, "BBKNN": 4209.41, "scVI": 4226.08 },
+            5: { "Seurat v5 CCA": 8091.00, "BBKNN": 7292.45, "scVI": 7314.23 },
+            6: { "Seurat v5 CCA": 10670.83, "BBKNN": 9602.14, "scVI": 9621.68 },
+            7: { "Seurat v5 CCA": 18352.40, "BBKNN": 17079.77, "scVI": 17100.98 },
+            8: { "Seurat v5 CCA": 10308.36, "BBKNN": 9449.52, "scVI": 9448.06 },
+            9: { "Seurat v5 CCA": 266.56, "BBKNN": 626.24, "scVI": 641.42 },
+            10: { "Seurat v5 CCA": 728.40, "BBKNN": 942.72, "scVI": 965.39 },
+            11: { "Seurat v5 CCA": 411.65, "BBKNN": 684.85, "scVI": 701.59 },
+            12: { "Seurat v5 CCA": 291.14, "BBKNN": 751.92, "scVI": 766.55 },
+            13: { "Seurat v5 CCA": 721.09, "BBKNN": 4209.41, "scVI": 1349.56 },
+            14: { "Seurat v5 CCA": 988.17, "BBKNN": 1773.87, "scVI": 1790.27 },
+            15: { "Seurat v5 CCA": 1368.05, "BBKNN": 3436.82, "scVI": 3459.05 },
+            16: { "Seurat v5 CCA": 1525.48, "BBKNN": 3938.86, "scVI": 3931.09 },
+            17: { "Seurat v5 CCA": 23024.16, "BBKNN": 19994.99, "scVI": 20077.18 },
+            18: { "Seurat v5 CCA": 23013.90, "BBKNN": 3209.64, "scVI": 3288.72 },
+            19: { "Seurat v5 CCA": 4274.42, "BBKNN": 3898.42, "scVI": 3915.68 },
+            20: { "Seurat v5 CCA": 7017.54, "BBKNN": 6360.83, "scVI": 6385.27 },
+            21: { "Seurat v5 CCA": 4706.66, "BBKNN": 4249.86, "scVI": 4268.56 },
+            22: { "Seurat v5 CCA": 4568.97, "BBKNN": 4209.41, "scVI": 4226.08 },
+            23: { "Seurat v5 CCA": 8091.00, "BBKNN": 7292.45, "scVI": 7314.23 },
+            24: { "Seurat v5 CCA": 10670.83, "BBKNN": 9602.14, "scVI": 9621.68 },
+            25: { "Seurat v5 CCA": 18352.40, "BBKNN": 17079.77, "scVI": 17100.98 },
+            26: { "Seurat v5 CCA": 10308.36, "BBKNN": 9449.52, "scVI": 9448.06 },
+            27: { "Seurat v5 CCA": 23024.16, "BBKNN": 19994.99, "scVI": 20077.18 }
+        };
+        
+        // Detailed metrics for Task 1 (example)
+        const taskMetrics = {
+            1: {
+                "Seurat v5 CCA": {batch_ari: 0.5672, cell_ari: 0.5491, graph_ilisi: 0.1200, graph_clisi: 0.9891, cell_nmi: 0.7517, batch_nmi: 0.8130, batch_asw: 0.5199, cell_asw: 0.6112, kbet: 0.0212, pcr_batch: 0.9499, graph_connect: 0.8991, score: 0.2773},
+                "Seurat v5 RPCA": {batch_ari: 0.5325, cell_ari: 0.5712, graph_ilisi: 0.0206, graph_clisi: 0.9960, cell_nmi: 0.8358, batch_nmi: 0.6460, batch_asw: 0.5028, cell_asw: 0.6247, kbet: 0.0055, pcr_batch: 0.7374, graph_connect: 0.8813, score: 0.2701},
+                "Harmony": {batch_ari: 0.2548, cell_ari: 0.5050, graph_ilisi: 0.0002, graph_clisi: 0.9972, cell_nmi: 0.8482, batch_nmi: 0.5903, batch_asw: 0.4091, cell_asw: 0.6006, kbet: 0.0010, pcr_batch: 0.0000, graph_connect: 0.8352, score: 0.2581},
+                "FastMNN": {batch_ari: 0.4646, cell_ari: 0.6568, graph_ilisi: 0.0419, graph_clisi: 0.9949, cell_nmi: 0.8434, batch_nmi: 0.6704, batch_asw: 0.5038, cell_asw: 0.6630, kbet: 0.0061, pcr_batch: 0.5585, graph_connect: 0.9125, score: 0.2697},
+                "JointPCA": {batch_ari: 0.3841, cell_ari: 0.5239, graph_ilisi: 0.0075, graph_clisi: 0.9966, cell_nmi: 0.8228, batch_nmi: 0.6217, batch_asw: 0.4670, cell_asw: 0.6376, kbet: 0.0038, pcr_batch: 0.0000, graph_connect: 0.9047, score: 0.2623},
+                "ComBat": {batch_ari: 0.2412, cell_ari: 0.5051, graph_ilisi: 0.0001, graph_clisi: 0.9972, cell_nmi: 0.8512, batch_nmi: 0.5874, batch_asw: 0.4088, cell_asw: 0.5999, kbet: 0.0000, pcr_batch: 0.0000, graph_connect: 0.8196, score: 0.2577},
+                "Conos": {batch_ari: 0.3072, cell_ari: 0.5012, graph_ilisi: 0.0021, graph_clisi: 0.9969, cell_nmi: 0.8383, batch_nmi: 0.5946, batch_asw: 0.5213, cell_asw: 0.5776, kbet: 0.0000, pcr_batch: 0.9998, graph_connect: 0.8524, score: 0.2685},
+                "scVI": {batch_ari: 0.5765, cell_ari: 0.5797, graph_ilisi: 0.1040, graph_clisi: 0.9911, cell_nmi: 0.7938, batch_nmi: 0.7649, batch_asw: 0.4930, cell_asw: 0.5437, kbet: 0.0240, pcr_batch: 0.9051, graph_connect: 0.9987, score: 0.2918},
+                "scANVI": {batch_ari: 0.4228, cell_ari: 0.6515, graph_ilisi: 0.0055, graph_clisi: 0.9984, cell_nmi: 0.8877, batch_nmi: 0.5886, batch_asw: 0.4964, cell_asw: 0.5731, kbet: 0.0097, pcr_batch: 0.6821, graph_connect: 0.9991, score: 0.2793},
+                "Scanorama": {batch_ari: 0.3145, cell_ari: 0.4957, graph_ilisi: 0.0001, graph_clisi: 0.9972, cell_nmi: 0.8619, batch_nmi: 0.5550, batch_asw: 0.3330, cell_asw: 0.5995, kbet: 0.0000, pcr_batch: 0.0000, graph_connect: 0.8197, score: 0.2560},
+                "BBKNN": {batch_ari: 0.3193, cell_ari: 0.5187, graph_ilisi: 0.0001, graph_clisi: 0.9970, cell_nmi: 0.8617, batch_nmi: 0.5518, batch_asw: 0.3227, cell_asw: 0.6159, kbet: 0.0000, pcr_batch: 0.0000, graph_connect: 0.8192, score: 0.2560}
+            }
+        };
+        
+        // ========== DOM Elements ==========
+        const casesGrid = document.getElementById('casesGrid');
+        const detailPanel = document.getElementById('detailPanel');
+        const closeDetail = document.querySelector('.close-detail');
+        const speciesFilter = document.getElementById('speciesFilter');
+        const geneFilter = document.getElementById('geneFilter');
+        const techFilter = document.getElementById('techFilter');
+        const searchBox = document.getElementById('searchBox');
+        const resetFilters = document.getElementById('resetFilters');
+        const userButton = document.getElementById('userButton');
+        
+        // Current state
+        let selectedTask = null;
+        let currentUser = null;
+        let rankingChart = null;
+        let timeChart = null;
+        
+        // ========== Helper Functions ==========
+        
+        function getSpeciesShortName(species) {
+            if (species.includes('Homo')) return 'Human';
+            if (species.includes('Mus')) return 'Mouse';
+            if (species.includes('Macaca')) return 'Macaque';
+            if (species.includes('Rattus')) return 'Rat';
+            if (species.includes('Sus')) return 'Pig';
+            if (species.includes('Canis')) return 'Dog';
+            if (species.includes('Tupaia')) return 'Tree shrew';
+            return species.split(' ')[0];
+        }
+        
+        function formatCellCount(cells) {
+            return cells.toLocaleString();
+        }
+        
+        function formatTime(seconds) {
+            if (seconds > 3600) {
+                return (seconds/3600).toFixed(1) + ' hr';
+            } else if (seconds > 60) {
+                return (seconds/60).toFixed(1) + ' min';
+            } else {
+                return seconds.toFixed(1) + ' sec';
+            }
+        }
+        
+        // ========== Render Functions ==========
+        
+        function renderCases(filteredTasks = tasks) {
+            casesGrid.innerHTML = '';
+            
+            filteredTasks.forEach(task => {
+                const card = document.createElement('div');
+                card.className = `case-card${selectedTask && selectedTask.id === task.id ? ' selected' : ''}`;
+                card.dataset.taskId = task.id;
+                
+                const speciesTags = task.species.map(s => {
+                    return `<span class="species-tag">${getSpeciesShortName(s)}</span>`;
+                }).join('');
+                
+                let geneDisplay = task.gene;
+                if (task.gene === 'O2O') geneDisplay = 'Orthologs';
+                else if (task.gene === 'HVG') geneDisplay = 'HVG';
+                else if (task.gene === 'ALL') geneDisplay = 'All genes';
+                
+                let techDisplay = task.tech.includes('10X') ? '10X' : 'SPLiT-seq';
+                
+                card.innerHTML = `
+                    <div class="case-card-badge">Task ${task.id}</div>
+                    <h3>Cross-species Integration Task ${task.id}</h3>
+                    <div class="case-card-species">
+                        ${speciesTags}
+                    </div>
+                    <div class="case-card-meta">
+                        <span><i class="fas fa-microscope"></i> ${techDisplay}</span>
+                        <span><i class="fas fa-dna"></i> ${geneDisplay}</span>
+                    </div>
+                    <div class="case-card-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">${formatCellCount(task.cells)}</div>
+                            <div class="stat-label">Cells</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">${task.species.length}</div>
+                            <div class="stat-label">Species</div>
+                        </div>
+                    </div>
+                    <div class="case-card-footer">
+                        <span class="case-source">${task.species.length} species</span>
+                        <a href="#" class="view-details" data-task-id="${task.id}">
+                            View details <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                `;
+                
+                casesGrid.appendChild(card);
+            });
+            
+            document.querySelectorAll('.view-details').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const taskId = parseInt(link.dataset.taskId);
+                    const task = tasks.find(t => t.id === taskId);
+                    showTaskDetail(task);
+                });
+            });
+            
+            document.querySelectorAll('.case-card').forEach(card => {
+                card.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('view-details') || e.target.closest('.view-details')) return;
+                    const taskId = parseInt(card.dataset.taskId);
+                    const task = tasks.find(t => t.id === taskId);
+                    showTaskDetail(task);
+                });
+            });
+        }
+        
+        function filterTasks() {
+            const speciesCount = speciesFilter.value;
+            const gene = geneFilter.value;
+            const tech = techFilter.value;
+            const searchTerm = searchBox.value.toLowerCase();
+            
+            const filtered = tasks.filter(task => {
+                if (speciesCount !== 'all' && task.species.length !== parseInt(speciesCount)) return false;
+                if (gene !== 'all' && task.gene !== gene) return false;
+                
+                if (tech !== 'all') {
+                    if (tech === '10X' && !task.tech.includes('10X')) return false;
+                    if (tech === 'SPLiT' && !task.tech.includes('SPLiT')) return false;
+                }
+                
+                if (searchTerm) {
+                    const speciesMatch = task.species.some(s => 
+                        s.toLowerCase().includes(searchTerm) || 
+                        getSpeciesShortName(s).toLowerCase().includes(searchTerm)
+                    );
+                    const idMatch = task.id.toString().includes(searchTerm);
+                    if (!speciesMatch && !idMatch) return false;
+                }
+                
+                return true;
+            });
+            
+            renderCases(filtered);
+        }
+        
+        function showTaskDetail(task) {
+            selectedTask = task;
+            renderCases();
+            
+            const taskScore = taskScores[task.id] || taskScores[1];
+            const taskTime = taskTimes[task.id] || taskTimes[1];
+            const taskDisk = diskSizes[task.id] || diskSizes[1];
+            
+            const diskValues = Object.values(taskDisk);
+            const avgDisk = (diskValues.reduce((a, b) => a + b, 0) / diskValues.length / 1024).toFixed(1);
+            
+            document.getElementById('detailTaskId').textContent = `Task ${task.id}`;
+            document.getElementById('detailTaskIdDisplay').textContent = `Task ${task.id}`;
+            
+            const speciesHtml = task.species.map(s => {
+                return `${getSpeciesShortName(s)} (${s})`;
+            }).join('<br>');
+            document.getElementById('detailSpecies').innerHTML = speciesHtml;
+            
+            document.getElementById('detailTechnology').textContent = task.tech;
+            document.getElementById('detailCellCount').textContent = formatCellCount(task.cells);
+            
+            let geneDisplay = task.gene;
+            if (task.gene === 'O2O') geneDisplay = 'O2O (Orthologs)';
+            else if (task.gene === 'HVG') geneDisplay = 'HVG (Highly variable)';
+            else if (task.gene === 'ALL') geneDisplay = 'ALL (All genes)';
+            document.getElementById('detailGeneStrategy').textContent = geneDisplay;
+            
+            const sourcesDiv = document.getElementById('dataSources');
+            sourcesDiv.innerHTML = '';
+            task.species.forEach(species => {
+                const source = dataSources[species] || 'GEO';
+                sourcesDiv.innerHTML += `
+                    <div class="info-row">
+                        <span class="info-label">${getSpeciesShortName(species)}</span>
+                        <span class="info-value">${source}</span>
+                    </div>
+                `;
+            });
+            
+            const sortedByScore = Object.entries(taskScore).sort((a, b) => b[1] - a[1]);
+            const bestMethod = sortedByScore[0];
+            
+            document.getElementById('bestOverall').textContent = bestMethod[0];
+            document.getElementById('bestOverallScore').textContent = bestMethod[1].toFixed(4);
+            document.getElementById('bestBatch').textContent = 'scANVI';
+            document.getElementById('bestBatchScore').textContent = '0.96-1.01';
+            
+            const sortedByTime = Object.entries(taskTime).sort((a, b) => a[1] - b[1]);
+            const fastestMethod = sortedByTime[0];
+            document.getElementById('fastestMethod').textContent = fastestMethod[0];
+            document.getElementById('fastestTime').textContent = formatTime(fastestMethod[1]);
+            
+            const metricsBody = document.getElementById('metricsTableBody');
+            metricsBody.innerHTML = '';
+            
+            const sortedMethods = Object.entries(taskScore).sort((a, b) => b[1] - a[1]);
+            
+            sortedMethods.forEach(([method, score], index) => {
+                const metrics = taskMetrics[1][method] || {
+                    batch_ari: 0, cell_ari: 0, graph_ilisi: 0, graph_clisi: 0,
+                    cell_nmi: 0, batch_nmi: 0, batch_asw: 0, cell_asw: 0,
+                    kbet: 0, pcr_batch: 0, graph_connect: 0
+                };
+                
+                metricsBody.innerHTML += `
+                    <tr>
+                        <td><span class="rank-badge ${index < 3 ? ['gold', 'silver', 'bronze'][index] : ''}">${index + 1}</span></td>
+                        <td><strong>${method}</strong></td>
+                        <td>${metrics.batch_ari.toFixed(4)}</td>
+                        <td>${metrics.cell_ari.toFixed(4)}</td>
+                        <td>${metrics.graph_ilisi.toFixed(4)}</td>
+                        <td>${metrics.graph_clisi.toFixed(4)}</td>
+                        <td>${metrics.cell_nmi.toFixed(4)}</td>
+                        <td>${metrics.batch_nmi.toFixed(4)}</td>
+                        <td>${metrics.batch_asw.toFixed(4)}</td>
+                        <td>${metrics.cell_asw.toFixed(4)}</td>
+                        <td>${metrics.kbet.toFixed(4)}</td>
+                        <td>${metrics.pcr_batch.toFixed(4)}</td>
+                        <td>${metrics.graph_connect.toFixed(4)}</td>
+                        <td style="color: #4ade80; font-weight: 600;">${score.toFixed(4)}</td>
+                    </tr>
+                `;
+            });
+            
+            const timeBody = document.getElementById('timeTableBody');
+            timeBody.innerHTML = '';
+            
+            Object.entries(taskTime).forEach(([method, time]) => {
+                const disk = taskDisk[method] || 0;
+                timeBody.innerHTML += `
+                    <tr>
+                        <td>${method}</td>
+                        <td>${formatTime(time)}</td>
+                        <td>${disk.toFixed(2)} MB</td>
+                    </tr>
+                `;
+            });
+            
+            const timeMetrics = document.getElementById('timeMetrics');
+            const fastest = sortedByTime[0];
+            const slowest = sortedByTime[sortedByTime.length - 1];
+            timeMetrics.innerHTML = `
+                <div class="metric-card">
+                    <div class="metric-title">Fastest</div>
+                    <div class="metric-value">${fastest[0]}</div>
+                    <div class="metric-unit">${formatTime(fastest[1])}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-title">Slowest</div>
+                    <div class="metric-value">${slowest[0]}</div>
+                    <div class="metric-unit">${formatTime(slowest[1])}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-title">Speed ratio</div>
+                    <div class="metric-value">${(slowest[1]/fastest[1]).toFixed(0)}x</div>
+                    <div class="metric-unit">fold</div>
+                </div>
+            `;
+            
+            document.getElementById('avgDiskSize').textContent = `~${avgDisk} GB`;
+            
+            updateCharts(sortedByScore.slice(0, 10), sortedByTime.slice(0, 10));
+            
+            detailPanel.classList.add('active');
+            detailPanel.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function updateCharts(topMethods, topTimes) {
+            if (rankingChart) rankingChart.destroy();
+            if (timeChart) timeChart.destroy();
+            
+            const rankCtx = document.getElementById('rankingChart').getContext('2d');
+            rankingChart = new Chart(rankCtx, {
+                type: 'bar',
+                data: {
+                    labels: topMethods.map(m => m[0].replace('Seurat v5 ', 'S-')),
+                    datasets: [{
+                        label: 'Overall Score',
+                        data: topMethods.map(m => m[1]),
+                        backgroundColor: 'rgba(74, 222, 128, 0.7)',
+                        borderColor: '#4ade80',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 0.35,
+                            grid: { color: 'rgba(148, 163, 184, 0.1)' },
+                            ticks: { color: '#94a3b8' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#94a3b8', maxRotation: 45 }
+                        }
+                    },
+                    plugins: {
+                        legend: { labels: { color: '#e2e8f0' } }
+                    }
+                }
+            });
+            
+            const timeCtx = document.getElementById('timeChart').getContext('2d');
+            timeChart = new Chart(timeCtx, {
+                type: 'bar',
+                data: {
+                    labels: topTimes.map(m => m[0].replace('Seurat v5 ', 'S-')),
+                    datasets: [{
+                        label: 'Running time (seconds) - log scale',
+                        data: topTimes.map(m => m[1]),
+                        backgroundColor: 'rgba(34, 211, 238, 0.7)',
+                        borderColor: '#22d3ee',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            type: 'logarithmic',
+                            grid: { color: 'rgba(148, 163, 184, 0.1)' },
+                            ticks: { 
+                                color: '#94a3b8',
+                                callback: function(value) {
+                                    if (value < 100) return value + 's';
+                                    if (value < 3600) return (value/60).toFixed(0) + 'm';
+                                    return (value/3600).toFixed(0) + 'h';
+                                }
+                            }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#94a3b8', maxRotation: 45 }
+                        }
+                    },
+                    plugins: {
+                        legend: { labels: { color: '#e2e8f0' } }
+                    }
+                }
+            });
+        }
+        
+        // ========== Event Listeners ==========
+        
+        speciesFilter.addEventListener('change', filterTasks);
+        geneFilter.addEventListener('change', filterTasks);
+        techFilter.addEventListener('change', filterTasks);
+        searchBox.addEventListener('input', filterTasks);
+        
+        resetFilters.addEventListener('click', () => {
+            speciesFilter.value = 'all';
+            geneFilter.value = 'all';
+            techFilter.value = 'all';
+            searchBox.value = '';
+            filterTasks();
+        });
+        
+        closeDetail.addEventListener('click', () => {
+            detailPanel.classList.remove('active');
+            selectedTask = null;
+            renderCases();
+        });
+        
+        document.querySelectorAll('.detail-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.detail-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                tab.classList.add('active');
+                const tabName = tab.dataset.tab;
+                document.getElementById(`tab${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`).classList.add('active');
+            });
+        });
+        
+        // ========== User Login Status Check ==========
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return null;
+        }
+
+        function updateUserMenu() {
+            const username = getCookie('username');
+            const userMenu = document.getElementById('userMenu');
+            
+            if (username) {
+                userMenu.innerHTML = `
+                    <span class="username"><i class="fas fa-user"></i> ${username}</span>
+                    <a href="/dashboard" class="secondary-button">Dashboard</a>
+                `;
+            } else {
+                userMenu.innerHTML = `
+                    <a href="/login" class="cta-button" style="padding: 8px 20px;">Login</a>
+                `;
+            }
+        }
+        
+        window.addEventListener('load', () => {
+            updateUserMenu();
+            renderCases();
+        });
+    </script>
+</body>
+</html>
